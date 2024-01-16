@@ -27,6 +27,7 @@ Future<DateTime?> showWebDatePicker({
   DateTime? lastDate,
   double? width,
   bool? withoutActionButtons,
+  bool? avoidOk,
   Color? weekendDaysColor,
 }) {
   return showPopupDialog(
@@ -36,6 +37,7 @@ Future<DateTime?> showWebDatePicker({
       firstDate: firstDate ?? DateTime(0),
       lastDate: lastDate ?? DateTime(100000),
       withoutActionButtons: withoutActionButtons ?? false,
+      avoidOk: avoidOk ?? false,
       weekendDaysColor: weekendDaysColor,
     ),
     asDropDown: true,
@@ -50,6 +52,7 @@ class _WebDatePicker extends StatefulWidget {
     required this.firstDate,
     required this.lastDate,
     required this.withoutActionButtons,
+    required this.avoidOk,
     this.weekendDaysColor,
   });
 
@@ -57,6 +60,7 @@ class _WebDatePicker extends StatefulWidget {
   final DateTime firstDate;
   final DateTime lastDate;
   final bool withoutActionButtons;
+  final bool avoidOk;
   final Color? weekendDaysColor;
 
   @override
@@ -132,7 +136,12 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         );
         if (isEnabled) {
           child = InkWell(
-            onTap: () => setState(() => _selectedDate = date),
+            onTap: () => setState(() {
+              _selectedDate = date;
+              if (widget.avoidOk) {
+                Navigator.of(context).pop(_selectedDate);
+              }
+            }),
             customBorder: const CircleBorder(),
             child: child,
           );
@@ -477,7 +486,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                 ),
 
                 /// OK
-                if (_viewMode == _PickerViewMode.day) ...[
+                if (_viewMode == _PickerViewMode.day && !widget.avoidOk) ...[
                   const SizedBox(width: 4.0),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(_selectedDate),
